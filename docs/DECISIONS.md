@@ -14,7 +14,7 @@ allowed to an old entry).
   scored runs. Every agent reads all three before working and appends to them after.
 - **Why:** several teammates use separate Claude agents; this is how they share state when
   they pull the repo.
-- **Status:** active
+- **Status:** superseded by D-006 (file name only)
 
 ### D-002 — Data stays out of git
 - **Date:** 2026-11-21 · **Author:** astral-fi via Claude
@@ -45,7 +45,7 @@ allowed to an old entry).
   `projectwild3/` and git-ignored (1.2 GB). CSVs and MiewID descriptors are in
   `projectwild3/reid_student_data_main/`; SIFT features are in
   `projectwild3/sift_features_{train,test}.npz/` as directories of per-image `.npy` files.
-  Code reads data from these paths by default. Exact layout is in `CLAUDE.md`.
+  Code reads data from these paths by default. Exact layout is in `AGENTS.md`.
 - **Why:** this is the complete download (includes the SIFT features that were missing).
 - **Status:** active
 
@@ -54,6 +54,16 @@ allowed to an old entry).
 - **Decision:** `projectwild3/train_images_*` contain the training cut-out JPEGs. No code may
   read them to make features or train anything.
 - **Why:** the rules forbid computing new features from images (academic misconduct).
+- **Status:** active
+
+### D-006 — Context is agent-neutral: `AGENTS.md`
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude
+- **Supersedes:** D-001 (file name only).
+- **Decision:** All shared context moved from `CLAUDE.md` to `AGENTS.md`, the cross-tool
+  convention read by Codex, Cursor, Aider, Jules, etc. `CLAUDE.md` and `GEMINI.md` import it
+  (`@AGENTS.md`); `.github/copilot-instructions.md` points to it. Every agent must keep
+  `AGENTS.md`, `DECISIONS.md` and `EXPERIMENTS.md` up to date as part of its work.
+- **Why:** teammates use different agents; one file avoids drifting copies.
 - **Status:** active
 
 ---

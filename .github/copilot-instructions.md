@@ -1,0 +1,1 @@
+All project context lives in AGENTS.md at the repo root, shared by every agent. Read it, docs/DECISIONS.md and docs/EXPERIMENTS.md before working, and follow the duties in AGENTS.md (log decisions and experiments, keep AGENTS.md current, obey the competition rules). Edit AGENTS.md, not this file.
