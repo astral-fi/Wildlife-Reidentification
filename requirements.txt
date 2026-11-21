@@ -1,0 +1,15 @@
+# Only the libraries the competition rules allow (see CLAUDE.md). Do not add others without TA approval.
+numpy
+pandas
+scipy
+scikit-learn
+statsmodels
+imbalanced-learn
+xgboost
+lightgbm
+catboost
+networkx
+opencv-python
+faiss-cpu
+matplotlib
+seaborn

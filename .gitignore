@@ -1,0 +1,16 @@
+# Competition data (get it from the course page; see CLAUDE.md)
+projectwild3/
+projectwild3.zip
+reid_student_data_main/
+*.npy
+*.npz
+*:Zone.Identifier
+
+# Generated
+cache/
+submissions/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
