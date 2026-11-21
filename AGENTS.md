@@ -131,6 +131,25 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 - Deep-learning frameworks (PyTorch, TensorFlow, Keras, JAX); conv / recurrent / attention layers.
 - AutoML tools (auto-sklearn, TPOT, H2O AutoML, …).
 
+## Code map
+
+| Path | What it is |
+|---|---|
+| `notebooks/01_eda.ipynb` | EDA: labels, MiewID similarity, LOO retrieval baseline, test-vs-train "knownness", SIFT counts and matching, and a ranked list of models to try (§7). Committed with outputs; re-run with `jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb` (~1.5 min). |
+
+## Key EDA findings (details in `notebooks/01_eda.ipynb`)
+
+- **Test is far less "known" than train**: median nearest-train cosine 0.44 / 0.46 for test vs
+  0.60 / 0.70 for train-LOO known queries (hyena / leopard); ~40–45% of test images are closer
+  to another test image than to any train image. Expect a large `new_individual` share
+  (plausibly 30–50%) — the new decision is likely the biggest lever.
+- MiewID cosine k-NN (centred + L2, max-sim per identity), LOO on train, known ids only:
+  MAP@5 0.88 hyena / 0.89 leopard.
+- Same-id similarity collapses across left/right flanks (~0.15 vs ~0.4 same viewpoint), almost
+  to the different-id level → use viewpoint.
+- First-pass SIFT ratio-test + homography RANSAC is weak (pair AUC 0.62 / 0.70); needs a better
+  geometric model before judging.
+
 ## Environment notes
 
 - All data is extracted and verified complete (2026-11-22): every train/test id has both

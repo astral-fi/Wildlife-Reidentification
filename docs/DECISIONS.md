@@ -66,6 +66,25 @@ allowed to an old entry).
 - **Why:** teammates use different agents; one file avoids drifting copies.
 - **Status:** active
 
+### D-007 — Default descriptor preprocessing: centre on train mean, then L2-normalise
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude
+- **Decision:** Compare MiewID descriptors by cosine after subtracting the train mean and
+  L2-normalising each row. Work per species.
+- **Why:** EDA (`notebooks/01_eda.ipynb` §2) — rows aren't normalised and dimensions have
+  non-zero means; centring raised same-vs-different pair AUC (0.857→0.864 hyena,
+  0.874→0.877 leopard). Small gain, but it's the baseline everyone should start from.
+- **Status:** active
+
+### D-008 — Treat `new_individual` as the main problem; validation must reflect a high new-rate
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude
+- **Decision:** Prioritise the new-individual decision (thresholds, calibrated P(new), test
+  clustering). When D-003's split is implemented, hold out enough identities that roughly
+  30–50% of validation queries are new, and report MAP@5 at a couple of new-rates.
+- **Why:** EDA §4 — test's nearest-train similarities look much more like never-seen
+  identities than train-LOO does. Leave-one-out on train has only ~1.4% new queries, so a
+  threshold tuned there would almost never say new (EDA §3 plot).
+- **Status:** active
+
 ---
 
 ## Open questions (for the humans / TA)
