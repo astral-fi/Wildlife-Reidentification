@@ -135,6 +135,11 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 
 | Path | What it is |
 |---|---|
+| `reid/data.py` | `load()` → train, test, X_train, X_test (aligned); `load_sift(id)`; `preprocess` (D-007). |
+| `reid/split.py` | Shared validation split (D-009), `make_split(seed)`, `describe(seed)`. |
+| `reid/evaluate.py` | `evaluate(predict)` (3-fold MAP@5) and `make_submission(predict, name)`; documents the `predict` interface every model implements. |
+| `reid/metric.py` | `map5`, `check_submission`. |
+| `models/baseline_knn.py` | Baseline: `python -m models.baseline_knn [--submit]` (val 0.9026). |
 | `notebooks/01_eda.ipynb` | EDA: labels, MiewID similarity, LOO retrieval baseline, test-vs-train "knownness", SIFT counts and matching, and a ranked list of models to try (§7). Committed with outputs; re-run with `jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb` (~1.5 min). |
 
 ## Key EDA findings (details in `notebooks/01_eda.ipynb`)

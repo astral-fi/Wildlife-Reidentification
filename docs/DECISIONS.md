@@ -36,7 +36,7 @@ allowed to an old entry).
   validation contains unseen identities. Random image-level splits would overstate accuracy.
 - **Open:** fraction of unseen identities. Test has a much higher hyena share than train
   (44% vs 27%), which hints at many new hyenas; the public LB is the only check on this.
-- **Status:** proposed
+- **Status:** implemented as D-009
 
 ### D-004 — Data lives in `projectwild3/` (full dataset)
 - **Date:** 2026-11-22 · **Author:** astral-fi via Claude
@@ -83,6 +83,21 @@ allowed to an old entry).
 - **Why:** EDA §4 — test's nearest-train similarities look much more like never-seen
   identities than train-LOO does. Leave-one-out on train has only ~1.4% new queries, so a
   threshold tuned there would almost never say new (EDA §3 plot).
+- **Status:** active
+
+### D-009 — Shared validation split and evaluation harness (`reid/`)
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude
+- **Implements:** D-003, D-008.
+- **Decision:** All models are scored with `reid.evaluate.evaluate(predict)` on
+  `reid.split.make_split(seed)` for seeds 0,1,2 (3 folds), reporting mean MAP@5 overall, per
+  species, and on known / new queries. Per species: whole identities with ≤20 images are held
+  out until ~40% of queries are new (actual ≈44%), plus 25% of the images of each remaining
+  identity with ≥2 images as known queries; the rest is the gallery. Models get the gallery
+  (with labels) and queries (without) through one `predict` interface, and the same function
+  produces test submissions via `reid.evaluate.make_submission`.
+- **Why:** comparable numbers across teammates and agents; a realistic new-rate (D-008).
+- **Caveat:** the new-rate (~44%) is a guess for test. Robust methods should also be checked
+  with `evaluate(..., new_frac=0.25)` and `new_frac=0.55`.
 - **Status:** active
 
 ---
