@@ -134,6 +134,25 @@ allowed to an old entry).
     weaker than cosine for the new decision (AUC 0.75 vs 0.90 hyena).
 - **Status:** active
 
+### D-012 — Our validation is missing cross-view known animals; that explains the LB gap
+- **Date:** 2026-11-23 · **Author:** astral-fi via Claude
+- **Finding:** `combo_lda_sift.csv` scored **0.80145** on the public LB vs 0.9235 on D-009
+  validation. Teammate notebook on branch `submissions/b1` (LB 0.83484) has a "viewpoint
+  stress" split that holds out a whole flank of known animals. Reproducing that idea
+  (`models/stress_crossview.py`): for half the gallery identities that have both flanks, move
+  one whole flank into the queries. Those cross-view known queries score only **~0.46–0.52**
+  MAP@5 and get `new_individual` first **58–66%** of the time; overall MAP@5 falls to
+  **0.77–0.80**, matching the LB.
+- **Interpretation:** the EDA's "test looks unknown" signal (D-008) is partly *known animals
+  seen from the other flank*, not only new animals. A similarity threshold can't tell them
+  apart, so we over-predict `new_individual` for them.
+- **Decision:** validation must include cross-view known queries (D-009 v2, to be added as
+  an option in `reid/split.py`), and new work should target them: flank-aware new decision
+  (lower threshold / put new at #2 when the candidate identity lacks the query's flank),
+  cross-flank matching signals, b1's viewpoint-weighted re-ranking.
+- **Supersedes:** the 30–50% new-rate estimate in D-008 is now doubtful.
+- **Status:** active
+
 ---
 
 ## Open questions (for the humans / TA)

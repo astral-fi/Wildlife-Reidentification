@@ -143,6 +143,10 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 | `models/combo_lda_sift.py` | **Current best (D-010), val 0.9235.** `python -m models.combo_lda_sift [--submit]` (fast once `cache/sift_pairs.pkl` exists; otherwise ~5 min val + ~2 min test SIFT matching). |
 | `models/metric_learning.py` | PCA/LDA/whitening/QE/viewpoint variants; `python -m models.metric_learning [variant ...]`. Results: `models/metric_RESULTS.md`. |
 | `models/sift_match.py`, `models/sift_rerank.py` | RootSIFT matching + affine RANSAC with disk cache and multiprocessing; SIFT re-ranking. Results: `models/sift_RESULTS.md`. |
+| `models/sift2_*.py` | Wider SIFT coverage, per-species (honest 0.9263 on D-009 v1). Results: `models/sift2_RESULTS.md`. |
+| `models/trans_graph.py` | k-reciprocal re-ranking, query clustering, pseudo-labels. Results: `models/trans_RESULTS.md`. |
+| `models/fusion2_*.py` | LR re-ranker with SIFT+LDA features; honest-tuning harness for the combo. Results: `models/fusion2_RESULTS.md`. |
+| `models/stress_crossview.py` | Cross-view known-animal stress check (D-012). |
 | `models/fusion_rerank.py` | Logistic/HGB candidate re-ranker on cosine+viewpoint features. Results: `models/fusion_RESULTS.md`. |
 | `models/newid_lr.py` | Calibrated P(new) + expected-AP placement. Results: `models/newid_RESULTS.md`. |
 | `notebooks/01_eda.ipynb` | EDA: labels, MiewID similarity, LOO retrieval baseline, test-vs-train "knownness", SIFT counts and matching, and a ranked list of models to try (§7). Committed with outputs; re-run with `jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb` (~1.5 min). |
@@ -162,11 +166,17 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 
 ## Current best and next ideas
 
-Best: `models/combo_lda_sift.py`, val MAP@5 0.9235 (D-010). Untried ideas worth doing next:
-feed SIFT inliers + LDA score into the `fusion_rerank` LR re-ranker; per-species SIFT weights;
-more than 2 images per identity / same-viewpoint SIFT matching; k-reciprocal re-ranking;
-clustering test queries to share evidence among recurring new individuals; first public-LB
-submission to check the ~44% new-rate assumption.
+- **Public LB:** best team score is 0.83484 (b1's notebook on branch `submissions/b1`);
+  our `combo_lda_sift` got 0.80145.
+- **Our validation (D-009 v1) is over-optimistic** — it lacks known animals seen only from
+  the other flank, which test has a lot of (D-012). Don't trust D-009 v1 gains alone; check
+  with `models/stress_crossview.py` until the cross-view split option lands.
+- Best on D-009 v1: `models/sift2_submit.py` (honest 0.9263), then `models/trans_graph.py`
+  (k-reciprocal, 0.9242), `models/combo_lda_sift.py` (0.9221 honest).
+- Next: cross-view split option; flank-aware new decision; study b1's viewpoint-weighted
+  LambdaRank/novelty models; then re-submit.
+- Teammate branches: `submissions/b1` (0.835 notebook), `amigo` (separate history; `src/`
+  experiments incl. LOBO KDE new-rate priors).
 
 ## Environment notes
 
