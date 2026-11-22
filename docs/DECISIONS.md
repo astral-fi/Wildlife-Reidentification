@@ -170,6 +170,18 @@ allowed to an old entry).
 - **Caveat:** b depends on how common cross-view animals are; CROSS_FRAC=0.5 is a guess
   calibrated only by the combo's v2 score matching the LB. On test the bonus changes top-1 for
   only 3% of images (mostly reshuffles ranks 2–5). Needs an LB check.
+- **Status:** model part **failed on the LB** (see D-014); split v2 kept but its calibration is in doubt
+
+### D-014 — Side-aware bonus did worse on the public LB than combo_lda_sift
+- **Date:** 2026-11-23 · **Author:** astral-fi via Claude
+- **Finding:** `submissions/sideaware.csv` scored below combo_lda_sift's 0.80145 on the public
+  LB, despite +0.043 on split v2. So v2 (CROSS_FRAC=0.5) over-represents "known animal whose
+  query flank is missing from the gallery" relative to test, or such animals are not the main
+  cause of the LB gap. The combo matching the LB on v2 (0.812 vs 0.801) was a coincidence of
+  averages, not proof the mix is right.
+- **Decision:** best LB submission is still `combo_lda_sift.csv` (ours) / b1's notebook (team).
+  Don't tune flank bonuses on v2. Treat v2 gains as unconfirmed until LB-checked; prefer changes
+  that help on **both** v1 and v2.
 - **Status:** active
 
 ---
