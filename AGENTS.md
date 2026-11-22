@@ -136,16 +136,17 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 | Path | What it is |
 |---|---|
 | `reid/data.py` | `load()` → train, test, X_train, X_test (aligned); `load_sift(id)`; `preprocess` (D-007). |
-| `reid/split.py` | Shared validation split (D-009), `make_split(seed)`, `describe(seed)`. |
+| `reid/split.py` | Shared validation split v2 (D-009 + D-013 cross-view), `make_split(seed, cross_frac=0.5)`, `cross_view_mask`, `describe(seed)`. |
 | `reid/evaluate.py` | `evaluate(predict)` (3-fold MAP@5) and `make_submission(predict, name)`; documents the `predict` interface every model implements. |
 | `reid/metric.py` | `map5`, `check_submission`. |
 | `models/baseline_knn.py` | Baseline: `python -m models.baseline_knn [--submit]` (val 0.9026). |
-| `models/combo_lda_sift.py` | **Current best (D-010), val 0.9235.** `python -m models.combo_lda_sift [--submit]` (fast once `cache/sift_pairs.pkl` exists; otherwise ~5 min val + ~2 min test SIFT matching). |
+| `models/combo_lda_sift.py` | Previous best (D-010), v1 val 0.9235 (v2 0.8119). `python -m models.combo_lda_sift [--submit]` (fast once `cache/sift_pairs.pkl` exists; otherwise ~5 min val + ~2 min test SIFT matching). |
 | `models/metric_learning.py` | PCA/LDA/whitening/QE/viewpoint variants; `python -m models.metric_learning [variant ...]`. Results: `models/metric_RESULTS.md`. |
 | `models/sift_match.py`, `models/sift_rerank.py` | RootSIFT matching + affine RANSAC with disk cache and multiprocessing; SIFT re-ranking. Results: `models/sift_RESULTS.md`. |
 | `models/sift2_*.py` | Wider SIFT coverage, per-species (honest 0.9263 on D-009 v1). Results: `models/sift2_RESULTS.md`. |
 | `models/trans_graph.py` | k-reciprocal re-ranking, query clustering, pseudo-labels. Results: `models/trans_RESULTS.md`. |
 | `models/fusion2_*.py` | LR re-ranker with SIFT+LDA features; honest-tuning harness for the combo. Results: `models/fusion2_RESULTS.md`. |
+| `models/sideaware.py` | **Current best (D-013), v2 honest 0.8553.** Side bonus for identities lacking the query's flank. `python -m models.sideaware [--submit]` (features cached in `cache/sideaware_feats.pkl`). |
 | `models/stress_crossview.py` | Cross-view known-animal stress check (D-012). |
 | `models/fusion_rerank.py` | Logistic/HGB candidate re-ranker on cosine+viewpoint features. Results: `models/fusion_RESULTS.md`. |
 | `models/newid_lr.py` | Calibrated P(new) + expected-AP placement. Results: `models/newid_RESULTS.md`. |
@@ -168,13 +169,15 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 
 - **Public LB:** best team score is 0.83484 (b1's notebook on branch `submissions/b1`);
   our `combo_lda_sift` got 0.80145.
-- **Our validation (D-009 v1) is over-optimistic** — it lacks known animals seen only from
-  the other flank, which test has a lot of (D-012). Don't trust D-009 v1 gains alone; check
-  with `models/stress_crossview.py` until the cross-view split option lands.
-- Best on D-009 v1: `models/sift2_submit.py` (honest 0.9263), then `models/trans_graph.py`
-  (k-reciprocal, 0.9242), `models/combo_lda_sift.py` (0.9221 honest).
-- Next: cross-view split option; flank-aware new decision; study b1's viewpoint-weighted
-  LambdaRank/novelty models; then re-submit.
+- **Validation is now split v2 (D-013)**, which includes known animals seen only from the
+  other flank. v1 (`cross_frac=0`) was over-optimistic (D-012). Report v2 numbers, honest
+  tuning (choose on 2 folds, score the 3rd).
+- **Best on v2: `models/sideaware.py`, honest 0.8553** (combo 0.8119 ≈ its LB 0.80). Submission
+  `submissions/sideaware.csv` — not yet LB-checked.
+- v1-era gains (`sift2_*`, `trans_graph` k-reciprocal) have not been re-checked on v2 yet.
+- Next: LB-check sideaware; port sift2 coverage + k-reciprocal onto sideaware and re-tune on v2;
+  cross-flank candidate signals (identities lacking the query flank are under-represented in the
+  top-10 SIFT candidates); study b1's viewpoint-weighted LambdaRank/novelty models.
 - Teammate branches: `submissions/b1` (0.835 notebook), `amigo` (separate history; `src/`
   experiments incl. LOBO KDE new-rate priors).
 

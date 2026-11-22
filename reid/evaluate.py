@@ -20,7 +20,7 @@ import pandas as pd
 
 from .data import NEW, ROOT, load
 from .metric import check_submission, map5
-from .split import N_FOLDS, make_split
+from .split import N_FOLDS, cross_view_mask, make_split
 
 
 def evaluate(predict, folds=range(N_FOLDS), verbose=True, **split_kw) -> dict:
@@ -39,14 +39,15 @@ def evaluate(predict, folds=range(N_FOLDS), verbose=True, **split_kw) -> dict:
         for s in ("hyena", "leopard"):
             m = sp == s
             r[s] = map5([p for p, k in zip(preds, m) if k], truth[m])
-        for name, m in (("known", truth != NEW), ("new", truth == NEW)):
-            r[name] = map5([p for p, k in zip(preds, m) if k], truth[m])
+        cv = cross_view_mask(f, **split_kw) if split_kw.get("cross_frac", 1) else np.zeros(len(q), bool)
+        for name, m in (("known", (truth != NEW) & ~cv), ("new", truth == NEW), ("xview", cv)):
+            r[name] = map5([p for p, k in zip(preds, m) if k], truth[m]) if m.any() else float("nan")
         rows.append(r)
         if verbose:
             print(f"fold {f}: all {r['all']:.4f} | hyena {r['hyena']:.4f} leopard {r['leopard']:.4f}"
-                  f" | known {r['known']:.4f} new {r['new']:.4f} | {r['secs']:.0f}s", flush=True)
+                  f" | known {r['known']:.4f} new {r['new']:.4f} xview {r['xview']:.4f} | {r['secs']:.0f}s", flush=True)
     df = pd.DataFrame(rows)
-    out = {k: float(df[k].mean()) for k in ("all", "hyena", "leopard", "known", "new")}
+    out = {k: float(df[k].mean()) for k in ("all", "hyena", "leopard", "known", "new", "xview")}
     out["std_all"] = float(df["all"].std())
     if verbose:
         print("mean: " + " | ".join(f"{k} {v:.4f}" for k, v in out.items()), flush=True)

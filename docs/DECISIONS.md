@@ -98,7 +98,7 @@ allowed to an old entry).
 - **Why:** comparable numbers across teammates and agents; a realistic new-rate (D-008).
 - **Caveat:** the new-rate (~44%) is a guess for test. Robust methods should also be checked
   with `evaluate(..., new_frac=0.25)` and `new_frac=0.55`.
-- **Status:** active
+- **Status:** active (default split is now v2, see D-013; pass `cross_frac=0` for v1)
 
 ### D-010 — Current best approach: cos+LDA blend + SIFT affine re-ranking (`models/combo_lda_sift.py`)
 - **Date:** 2026-11-22 · **Author:** astral-fi via Claude (four parallel agents + combination)
@@ -151,6 +151,25 @@ allowed to an old entry).
   (lower threshold / put new at #2 when the candidate identity lacks the query's flank),
   cross-flank matching signals, b1's viewpoint-weighted re-ranking.
 - **Supersedes:** the 30–50% new-rate estimate in D-008 is now doubtful.
+- **Status:** active
+
+### D-013 — Split v2 (cross-view queries) is the default; side-aware ranking is the new best
+- **Date:** 2026-11-23 · **Author:** astral-fi via Claude
+- **Decision (split):** `reid.split.make_split` now adds cross-view queries by default
+  (`CROSS_FRAC = 0.5`): for half the remaining identities whose gallery shows both flanks, every
+  gallery image of one random flank becomes a query. Per fold ≈ 3,300 queries, ~34% new, ~650–950
+  cross-view. `evaluate` reports a new `xview` column; `known` now excludes cross-view queries.
+  `cross_frac=0` reproduces v1 exactly (the v1 part uses its own random stream).
+- **Why:** v1 scored combo 0.9235 but the LB gave 0.80 (D-012). On v2 the same combo scores
+  **0.8119** (honest) — close to the LB, so v2 is a much better proxy.
+- **Decision (model):** `models/sideaware.py`: combo score + `b · [identity has no gallery image
+  on the query's flank]`, b = 0.20 hyena / 0.15 leopard; new first if top < T (0.48 / 0.54),
+  else #2. Queries without a flank get no bonus.
+- **Result (v2, honest):** **0.8553 ±0.007** vs combo 0.8119; cross-view queries 0.545 → 0.739,
+  known 0.824 → 0.845, new 0.952 → 0.937.
+- **Caveat:** b depends on how common cross-view animals are; CROSS_FRAC=0.5 is a guess
+  calibrated only by the combo's v2 score matching the LB. On test the bonus changes top-1 for
+  only 3% of images (mostly reshuffles ranks 2–5). Needs an LB check.
 - **Status:** active
 
 ---
