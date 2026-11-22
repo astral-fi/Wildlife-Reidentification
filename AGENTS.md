@@ -140,6 +140,11 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 | `reid/evaluate.py` | `evaluate(predict)` (3-fold MAP@5) and `make_submission(predict, name)`; documents the `predict` interface every model implements. |
 | `reid/metric.py` | `map5`, `check_submission`. |
 | `models/baseline_knn.py` | Baseline: `python -m models.baseline_knn [--submit]` (val 0.9026). |
+| `models/combo_lda_sift.py` | **Current best (D-010), val 0.9235.** `python -m models.combo_lda_sift [--submit]` (fast once `cache/sift_pairs.pkl` exists; otherwise ~5 min val + ~2 min test SIFT matching). |
+| `models/metric_learning.py` | PCA/LDA/whitening/QE/viewpoint variants; `python -m models.metric_learning [variant ...]`. Results: `models/metric_RESULTS.md`. |
+| `models/sift_match.py`, `models/sift_rerank.py` | RootSIFT matching + affine RANSAC with disk cache and multiprocessing; SIFT re-ranking. Results: `models/sift_RESULTS.md`. |
+| `models/fusion_rerank.py` | Logistic/HGB candidate re-ranker on cosine+viewpoint features. Results: `models/fusion_RESULTS.md`. |
+| `models/newid_lr.py` | Calibrated P(new) + expected-AP placement. Results: `models/newid_RESULTS.md`. |
 | `notebooks/01_eda.ipynb` | EDA: labels, MiewID similarity, LOO retrieval baseline, test-vs-train "knownness", SIFT counts and matching, and a ranked list of models to try (§7). Committed with outputs; re-run with `jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb` (~1.5 min). |
 
 ## Key EDA findings (details in `notebooks/01_eda.ipynb`)
@@ -154,6 +159,14 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
   to the different-id level → use viewpoint.
 - First-pass SIFT ratio-test + homography RANSAC is weak (pair AUC 0.62 / 0.70); needs a better
   geometric model before judging.
+
+## Current best and next ideas
+
+Best: `models/combo_lda_sift.py`, val MAP@5 0.9235 (D-010). Untried ideas worth doing next:
+feed SIFT inliers + LDA score into the `fusion_rerank` LR re-ranker; per-species SIFT weights;
+more than 2 images per identity / same-viewpoint SIFT matching; k-reciprocal re-ranking;
+clustering test queries to share evidence among recurring new individuals; first public-LB
+submission to check the ~44% new-rate assumption.
 
 ## Environment notes
 

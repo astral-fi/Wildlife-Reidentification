@@ -100,6 +100,40 @@ allowed to an old entry).
   with `evaluate(..., new_frac=0.25)` and `new_frac=0.55`.
 - **Status:** active
 
+### D-010 — Current best approach: cos+LDA blend + SIFT affine re-ranking (`models/combo_lda_sift.py`)
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude (four parallel agents + combination)
+- **Decision:** The best pipeline so far, per species:
+  1. Identity score = max over that identity's gallery images of the mean of (a) cosine on
+     centred+L2 MiewID and (b) cosine in a PCA-256 → LDA-128 (shrinkage 0.3) space fitted on
+     the gallery (re-centred, L2). (`models/metric_learning.py`)
+  2. For the top-10 cosine identities, SIFT-verify the query against each identity's 2
+     best-cosine images: RootSIFT, mutual-NN + 0.8 ratio, `cv2.estimateAffinePartial2D`
+     RANSAC 8 px. Add `0.09 * log1p(max(inliers - 3, 0))` (max over the 2 images).
+     (`models/sift_match.py`, `models/sift_rerank.py`; pair results cached in `cache/`.)
+  3. `new_individual` first if the top score < T (hyena 0.495, leopard 0.53), else second.
+- **Why:** the two parts are complementary — LDA blend mostly improves the new decision,
+  SIFT mostly improves known-id ranking (+0.027 known). Combined val 0.9235 ±0.004 vs
+  baseline 0.9026; each part alone 0.909 / 0.918.
+- **Caveat:** T and w were tuned on the same 3 folds they are scored on (slightly optimistic).
+- **Status:** active
+
+### D-011 — Findings that closed off directions (don't redo without a new idea)
+- **Date:** 2026-11-22 · **Author:** astral-fi via Claude
+- **Decision / findings:**
+  - Calibrated P(new) via gallery-trained logistic regression + expected-AP placement
+    (`models/newid_lr.py`): 0.9027, no gain over a tuned threshold. New queries already score
+    ~0.97; the remaining loss is mostly known-id ranking.
+  - Learned candidate re-ranker (logistic regression on 16 cosine/viewpoint features,
+    `models/fusion_rerank.py`): 0.9073; HistGradientBoosting no better than LR. P(new) as
+    `1 - max prob` beats `1 - sum prob`. Not yet combined with SIFT/LDA features — a natural
+    next step (add SIFT inliers and LDA score as features).
+  - LDA or PCA whitening alone, query expansion (k=3,5), top-2 identity aggregation, and
+    simple additive viewpoint bonuses/penalties all hurt slightly (0.001–0.003).
+  - SIFT: geometric model choice barely matters once matches are mutual-NN filtered
+    (affine ≈ homography 20 px ≈ match count); fundamental matrix slightly worse. SIFT is
+    weaker than cosine for the new decision (AUC 0.75 vs 0.90 hyena).
+- **Status:** active
+
 ---
 
 ## Open questions (for the humans / TA)
