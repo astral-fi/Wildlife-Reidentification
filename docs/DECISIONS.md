@@ -184,6 +184,25 @@ allowed to an old entry).
   that help on **both** v1 and v2.
 - **Status:** active
 
+### D-015 — b1's pipeline is the base; rank-fusing our models into it adds nothing
+- **Date:** 2026-11-24 · **Author:** astral-fi via Claude
+- **Done:** b1's notebook (branch `submissions/b1`, LB 0.83484) is now importable as
+  `models/b1_pipeline.py` (code unchanged; needs `lightgbm`, which is allowed). The local re-run
+  of its test file does **not** byte-match the scored file (SHA differs; likely library versions)
+  — `submissions/b1/submission_boosting_follow.csv`. `models/b1_eval.py` runs it on our split v2
+  folds (cached in `cache/b1_folds.pkl`, ~15 CPU-min per fold).
+- **Results on split v2 (3 folds):** b1 V3 0.8308 (non-cross-view 0.8956, cross-view 0.578) vs
+  our combo 0.8145 (0.8830 / 0.547). The ordering matches the LB (0.835 vs 0.801), so the
+  **non-cross-view part of v2 is a usable proxy**; the cross-view part is not (sideaware wins it
+  but lost on the LB, D-014).
+- **Rank fusion** (`models/ens_b1.py`, weighted RRF, honest tuning): b1 V3 + combo = b1 V3 alone
+  (the tuner gives our list almost no weight). b1 V3 + sideaware "wins" v2 (0.8575) only via the
+  untrustworthy cross-view part, so it is **not** used.
+- **Decision:** treat b1 V3 as the team's base model. Further gains must come from inside it
+  (e.g. adding our wider-SIFT / LDA-blend / k-reciprocal scores as LightGBM features), judged on
+  the non-cross-view v2 metric plus LB checks.
+- **Status:** active
+
 ---
 
 ## Open questions (for the humans / TA)

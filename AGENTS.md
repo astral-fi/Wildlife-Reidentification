@@ -147,6 +147,9 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 | `models/trans_graph.py` | k-reciprocal re-ranking, query clustering, pseudo-labels. Results: `models/trans_RESULTS.md`. |
 | `models/fusion2_*.py` | LR re-ranker with SIFT+LDA features; honest-tuning harness for the combo. Results: `models/fusion2_RESULTS.md`. |
 | `models/sideaware.py` | v2 honest 0.8553 but worse on LB (D-014). Side bonus for identities lacking the query's flank. `python -m models.sideaware [--submit]` (features cached in `cache/sideaware_feats.pkl`). |
+| `models/b1_pipeline.py` | b1's notebook (LB 0.83484) as an importable module; `python -m models.b1_pipeline` writes `submissions/b1/*.csv` (~13 CPU-min). Needs `lightgbm`. |
+| `models/b1_eval.py` | Runs b1's pipeline on our v2 folds → `cache/b1_folds.pkl`. |
+| `models/ens_b1.py` | Weighted reciprocal-rank fusion of b1 with our models (no gain, D-015). |
 | `models/stress_crossview.py` | Cross-view known-animal stress check (D-012). |
 | `models/fusion_rerank.py` | Logistic/HGB candidate re-ranker on cosine+viewpoint features. Results: `models/fusion_RESULTS.md`. |
 | `models/newid_lr.py` | Calibrated P(new) + expected-AP placement. Results: `models/newid_RESULTS.md`. |
@@ -175,6 +178,9 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 - `models/sideaware.py` scored 0.8553 on v2 but **did worse on the LB than combo (D-014)** — v2's
   cross-view share is probably too high. Our best LB is still `combo_lda_sift.csv` (0.80145);
   team best is b1's notebook (0.83484). Prefer changes that help on both v1 and v2.
+- **Team base model: b1's pipeline, `models/b1_pipeline.py` (D-015).** On v2: 0.8308 (non-xview
+  0.8956) vs our combo 0.8145 (0.8830). Judge changes on the **non-xview v2 metric** + LB.
+  Rank-fusing our models into it adds nothing; next is adding our scores as features inside it.
 - v1-era gains (`sift2_*`, `trans_graph` k-reciprocal) have not been re-checked on v2 yet.
 - Next: port sift2 coverage + k-reciprocal onto sideaware and re-tune on v2;
   cross-flank candidate signals (identities lacking the query flank are under-represented in the
@@ -187,5 +193,5 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 - All data is extracted and verified complete (2026-11-22): every train/test id has both
   SIFT `.npy` files; some images have 0 keypoints.
 - Python 3.13, numpy 2.4, pandas 3.1, scikit-learn 1.9, opencv 4.10 are installed on the
-  original author's machine. xgboost / lightgbm / catboost / faiss are **not** installed there.
+  original author's machine. xgboost / catboost / faiss are **not** installed there; lightgbm 4.7 is (installed 2026-11-23 for b1's pipeline).
 - See `requirements.txt` for the allowed package set.
