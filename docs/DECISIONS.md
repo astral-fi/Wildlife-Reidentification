@@ -203,6 +203,18 @@ allowed to an old entry).
   the non-cross-view v2 metric plus LB checks.
 - **Status:** active
 
+### D-016 — Wider SIFT coverage inside b1's pipeline
+- **Date:** 2026-11-24 · **Author:** astral-fi via Claude
+- **Decision:** `models/b1_pipeline.py` gets env switches (defaults = b1's original):
+  `B1_SIFT_REFS` (refs per top-9 candidate, b1: 2), `B1_TAIL_REFS` (refs for shortlist ranks
+  ≥5, b1: 1), `B1_SIFT_TOP2` (adds sum of top-2 inliers as a feature). Chosen setting:
+  **REFS=4, TAIL=2, TOP2=1** (ports sift2's finding that more images per identity helps).
+- **Why:** split v2, V3: non-cross-view **0.8994 vs 0.8956** (+0.0038, up on all 3 folds:
+  +0.0044/+0.0043/+0.0027); all 0.8350 vs 0.8308; cross-view 0.5836 vs 0.5783.
+  b1 already had an LDA-like metric projection and graph/flow scores (like k-reciprocal), so
+  those of our signals were not ported.
+- **Status:** active — test file `submissions/b1_refs4/submission_boosting_follow.csv`, needs LB check
+
 ---
 
 ## Open questions (for the humans / TA)

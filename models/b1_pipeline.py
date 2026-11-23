@@ -45,8 +45,10 @@ ANGLES = {
     "back": 4, "backleft": 5, "left": 6, "frontleft": 7,
 }
 SHORTLIST = 14
-SIFT_IDENTITIES = 9
-SIFT_REFS = 2
+SIFT_IDENTITIES = int(os.environ.get("B1_SIFT_IDS", 9))
+SIFT_REFS = int(os.environ.get("B1_SIFT_REFS", 2))        # our change (D-016): more refs per id
+TAIL_REFS = int(os.environ.get("B1_TAIL_REFS", 1))        # refs for shortlist positions >= 4
+SIFT_TOP2 = os.environ.get("B1_SIFT_TOP2", "0") == "1"   # add sum of top-2 inliers feature
 
 
 def unit(x):
@@ -271,7 +273,8 @@ class SiftStore:
             np.take_along_axis(result, best[:, :, None, None], axis=2).squeeze(2),
             result[..., 1].mean(axis=2, keepdims=True),
             result[..., 5].max(axis=2, keepdims=True),
-        ], axis=2)
+        ] + ([np.sort(result[..., 1], axis=2)[..., -2:].sum(axis=2, keepdims=True)]
+             if SIFT_TOP2 and result.shape[2] >= 2 else []), axis=2)
 
 
 def strongest(matrix, labels, n_labels):
@@ -369,7 +372,7 @@ def pooled_features(scores, gallery_class, candidates, side, refs, priority):
         refs[qi[active], ci[active], :picked.shape[1]] = gallery_columns[picked]
     # The tail of the shortlist gets one geometric check. For well-separated
     # global leaders, verify the nearest few alternatives rather than every tail.
-    refs[:, 4:, 1] = -1
+    refs[:, 4:, TAIL_REFS:] = -1
     secure = (out[:, 0, 0] > 0.67) & (
         out[:, 0, 0] - np.max(out[:, 1:, 0], axis=1) > 0.18)
     refs[secure, 4:] = -1

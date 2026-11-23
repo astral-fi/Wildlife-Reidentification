@@ -148,7 +148,8 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
 | `models/fusion2_*.py` | LR re-ranker with SIFT+LDA features; honest-tuning harness for the combo. Results: `models/fusion2_RESULTS.md`. |
 | `models/sideaware.py` | v2 honest 0.8553 but worse on LB (D-014). Side bonus for identities lacking the query's flank. `python -m models.sideaware [--submit]` (features cached in `cache/sideaware_feats.pkl`). |
 | `models/b1_pipeline.py` | b1's notebook (LB 0.83484) as an importable module; `python -m models.b1_pipeline` writes `submissions/b1/*.csv` (~13 CPU-min). Needs `lightgbm`. |
-| `models/b1_eval.py` | Runs b1's pipeline on our v2 folds → `cache/b1_folds.pkl`. |
+| `models/b1_eval.py` | Runs b1's pipeline on our v2 folds → `cache/b1_folds<B1_TAG>.pkl` (same env switches as the pipeline). |
+| `models/b1_compare.py` | Compare cached b1 variants on v2: `python -m models.b1_compare "" _refs4`. |
 | `models/ens_b1.py` | Weighted reciprocal-rank fusion of b1 with our models (no gain, D-015). |
 | `models/stress_crossview.py` | Cross-view known-animal stress check (D-012). |
 | `models/fusion_rerank.py` | Logistic/HGB candidate re-ranker on cosine+viewpoint features. Results: `models/fusion_RESULTS.md`. |
@@ -180,7 +181,9 @@ provided keypoints only), faiss-cpu, matplotlib, seaborn. Ask the TA before anyt
   team best is b1's notebook (0.83484). Prefer changes that help on both v1 and v2.
 - **Team base model: b1's pipeline, `models/b1_pipeline.py` (D-015).** On v2: 0.8308 (non-xview
   0.8956) vs our combo 0.8145 (0.8830). Judge changes on the **non-xview v2 metric** + LB.
-  Rank-fusing our models into it adds nothing; next is adding our scores as features inside it.
+  Rank-fusing our models into it adds nothing. **Best variant: wider SIFT (D-016)**, run with
+  `B1_SIFT_REFS=4 B1_TAIL_REFS=2 B1_SIFT_TOP2=1 B1_OUT=submissions/b1_refs4 python -m models.b1_pipeline`
+  (non-xview 0.8994 vs 0.8956) — awaiting LB check.
 - v1-era gains (`sift2_*`, `trans_graph` k-reciprocal) have not been re-checked on v2 yet.
 - Next: port sift2 coverage + k-reciprocal onto sideaware and re-tune on v2;
   cross-flank candidate signals (identities lacking the query flank are under-represented in the

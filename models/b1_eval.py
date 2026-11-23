@@ -8,7 +8,9 @@ from reid.data import ROOT, load
 from reid.evaluate import map5
 from reid.split import N_FOLDS, cross_view_mask, make_split
 
-OUT = ROOT / "cache" / "b1_folds.pkl"
+import os
+TAG = os.environ.get("B1_TAG", "")
+OUT = ROOT / "cache" / f"b1_folds{TAG}.pkl"
 
 def run_fold(data, store, f):
     g, q, t = make_split(f)
