@@ -4,3 +4,4 @@
 /train_images_leopard/
 /sift_features_test.npz
 /sift_features_train.npz
+/cache_v2/
