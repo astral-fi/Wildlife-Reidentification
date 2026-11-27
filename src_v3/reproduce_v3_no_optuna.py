@@ -266,6 +266,9 @@ def fit_clean_stage2(sub_bundles, target_bundle, species, hp, seed=42):
 
 def main():
     t0 = time.time()
+    # Opt-in: V3_BUNDLE_SUFFIX=_exh reads cache_v3/v3_bundles_{sp}_exh.pkl (exhaustive-SIFT features added by
+    # src_v3/add_exh_to_bundles.py) and writes ..._reproduced_no_optuna_exh.csv. Unset = original behaviour.
+    suffix = os.environ.get("V3_BUNDLE_SUFFIX", "")
     os.makedirs("submissions_v3", exist_ok=True)
     with open(os.path.join(CACHE_V3_DIR, "optuna_stage2_3_v3_best_params.json"), "r") as f:
         hp_all = json.load(f)["stage2_hp"]
@@ -279,7 +282,7 @@ def main():
         hp = hp_all[sp]
         s3 = s3_all[sp]
         p, cal_p, ow = s3["stage3"], s3["platt"], s3["open_weights"]
-        with open(os.path.join(CACHE_V3_DIR, f"v3_bundles_{sp}.pkl"), "rb") as f:
+        with open(os.path.join(CACHE_V3_DIR, f"v3_bundles_{sp}{suffix}.pkl") if os.path.exists(os.path.join(CACHE_V3_DIR, f"v3_bundles_{sp}{suffix}.pkl")) else os.path.join(CACHE_V3_DIR, f"v3_bundles_{sp}.pkl"), "rb") as f:
             data = pickle.load(f)
         test_b, full_seed_bundles = data["test_bundle"], data["full_seed_bundles"]
         run_specs = [(2026, 2026), (7777, 7777), (2026, 9999)]
@@ -314,7 +317,7 @@ def main():
             test_preds[te_pos] = " ".join(pr_t[loc_i])
         print(f"[REPRODUCE V3 NO-OPTUNA] Finished {sp.upper()}!")
 
-    out_path = "submissions_v3/submission_v3_reproduced_no_optuna.csv"
+    out_path = f"submissions_v3/submission_v3_reproduced_no_optuna{suffix}.csv"
     pd.DataFrame({"id": test_df["id"].values, "predictions": test_preds}).to_csv(out_path, index=False)
     print(f"Saved strictly rule-compliant V3 reproduction to {out_path} in {time.time() - t0:.1f}s!")
 
