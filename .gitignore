@@ -6,3 +6,8 @@
 /sift_features_train.npz
 /cache_v2/
 /cache_v3/
+/artifacts_v3/
+/kaggle/wildreid_v3_dataset/
+/kaggle/wildreid_v3_dataset.zip
+/kaggle/wildreid_v4_dataset/
+/kaggle/wildreid_v4_dataset.zip

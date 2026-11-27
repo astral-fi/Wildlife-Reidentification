@@ -40,15 +40,19 @@ def main():
     ap.add_argument("--out", default="artifacts_v3")
     ap.add_argument("--bundle-suffix", default=os.environ.get("V3_BUNDLE_SUFFIX", ""),
                     help="'' (default) or '_exh' for the exhaustive-SIFT leopard bundles")
+    ap.add_argument("--stage3-file", default=PARAM_FILES["stage3"],
+                    help="stage-3 params JSON in cache_v3/ (V4: v3_final_polished_stage3_params_exhsift.json)")
+    ap.add_argument("--species", nargs="+", default=["hyena", "leopard"], choices=["hyena", "leopard"],
+                    help="debug/timing only: restrict to some species")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
     t0 = time.time()
 
     hp_all = load_json(find_param_file(PARAM_FILES["stage2"]))["stage2_hp"]
-    s3_all = load_json(find_param_file(PARAM_FILES["stage3"]))
+    s3_all = load_json(find_param_file(args.stage3_file))
     s1_all = load_json(find_param_file(PARAM_FILES["stage1"]))
 
-    for sp in ["hyena", "leopard"]:
+    for sp in args.species:
         ts = time.time()
         path, suffix = bundle_path(sp, args.bundle_suffix)
         with open(path, "rb") as f:
@@ -72,6 +76,7 @@ def main():
         "prior_pi_new": PRIOR_PI_NEW_V3,
         "run_specs": RUN_SPECS,
         "bundle_suffix": args.bundle_suffix,
+        "stage3_file": args.stage3_file,
     }
     with open(os.path.join(args.out, "v3_params.json"), "w") as f:
         json.dump(params, f, indent=2)

@@ -106,11 +106,13 @@ def main():
     ap.add_argument("--artifacts", default="artifacts_v3")
     ap.add_argument("--test-bundle", choices=["rebuild", "cached"], default="rebuild")
     ap.add_argument("--out", default="submission.csv")
+    ap.add_argument("--species", nargs="+", default=["hyena", "leopard"], choices=["hyena", "leopard"],
+                    help="debug/timing only: restrict to some species")
     args = ap.parse_args()
     t0 = time.time()
 
     params = load_json(os.path.join(args.artifacts, "v3_params.json"))
-    species_list = ["hyena", "leopard"]
+    species_list = args.species
     arts = {sp: joblib.load(os.path.join(args.artifacts, f"v3_stage2_{sp}.joblib")) for sp in species_list}
     print(f"[INFER V3] artifacts loaded in {time.time() - t0:.1f}s", flush=True)
 
@@ -133,7 +135,8 @@ def main():
         print(f"[INFER V3] {sp}: predicted {len(test_b['te_pos'])} queries in {time.time() - ts:.1f}s", flush=True)
 
     sub = pd.DataFrame({"id": test_df["id"].values, "predictions": test_preds})
-    check_submission(sub, test_df)
+    if all(p is not None for p in test_preds):
+        check_submission(sub, test_df)
     sub.to_csv(args.out, index=False)
     print(f"[INFER V3] wrote {args.out} in {time.time() - t0:.1f}s total")
 
