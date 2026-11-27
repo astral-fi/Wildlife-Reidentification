@@ -14,3 +14,10 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 venv/
+
+# Kaggle dataset bundles (generated)
+kaggle/wildreid_v*_dataset/
+kaggle/wildreid_v*_dataset.zip
+cache_v2/
+cache_v3/
+artifacts_v3/
