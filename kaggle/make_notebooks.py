@@ -141,7 +141,7 @@ sub.head(10)'''),
 
 
 make("v3", [], "V3: MiewID + SIFT/VLAD/Fisher candidate features, stacked rerankers, open-set detectors, cluster consensus.", "wildreid-v3")
-make("v4", ["--bundle-suffix", "_exh", "--stage3-file", "v3_final_polished_stage3_params_exhsift.json"],
+make("v4", ["--bundle-suffix", "_exh", "--stage3-file", "v4_stage3_params.json"],
      "V4 = V3 + exhaustive SIFT verification of each leopard query against up to 24 gallery images of each of its "
-     "top-20 candidate identities (+7 candidate and +3 open-set leopard features), with re-polished stage-3 parameters. "
-     "Hyena features are unchanged.", "wildreid-v4")
+     "top-20 candidate identities (+7 candidate and +3 open-set leopard features), re-polished leopard stage-3 parameters. "
+     "Hyena is exactly V3 (same features and parameters).", "wildreid-v4")
